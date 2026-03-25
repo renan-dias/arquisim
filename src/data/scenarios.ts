@@ -4,7 +4,7 @@ export interface Scenario {
   company: string;
   stakeholder: string;
   role: string;
-  briefing: string;
+  briefing: string[];
   projectType: 'Web App' | 'Mobile App' | 'API' | 'Desktop' | 'Data Pipeline' | 'IoT';
   budgetMsg?: string;
   timeMsg?: string;
@@ -20,7 +20,15 @@ export const scenarios: Scenario[] = [
     role: "VP de Vendas",
     projectType: "Web App",
     complexity: "Média",
-    briefing: "Olá, me chamo Roberto, sou o VP de Vendas da MegaShop. Resolvi entrar em contato com vocês porque nossa plataforma atual quebrou na Black Friday. Quero um sistema web moderno que aguente 50.000 usuários simultâneos. Não me venha com arquiteturas lentas, precisamos de velocidade e um front-end impecável."
+    briefing: [
+      "Olá, tudo bem?",
+      "Me chamo Roberto, sou o VP de Vendas aqui da MegaShop.",
+      "Resolvi entrar em contato com vocês porque a nossa situação está crítica. Nossa plataforma atual simplesmente derreteu na última Black Friday.",
+      "Nós precisamos construir um sistema web web moderno do zero.",
+      "A expectativa é que a arquitetura aguente cerca de 50.000 usuários simultâneos nos momentos de pico.",
+      "Não me venha com arquiteturas lentas, precisamos de velocidade de carregamento absurda e um front-end perfeitamente clean.",
+      "Vocês conseguem assumir essa bronca pra gente?"
+    ]
   },
   {
     id: "SCN-002",
@@ -30,7 +38,15 @@ export const scenarios: Scenario[] = [
     role: "CEO",
     projectType: "Mobile App",
     complexity: "Média",
-    briefing: "Oie, tudo bem? Aqui é a Letícia da ZupFood. Seguinte: meus motoboys estão usando WhatsApp pra gerir entregas. Uma bagunça. Preciso que sua empresa crie nosso aplicativo nativo. Tem que ter GPS em tempo real, pagamento via PIX integrado, e rodar tanto em Android quanto iOS lisinho!"
+    briefing: [
+      "Oie, tudo bem por aí?",
+      "Aqui é a Letícia, fundadora e CEO da ZupFood.",
+      "Preciso da ajuda da equipe de engenharia de vocês urgente.",
+      "Hoje meus motoboys estão usando grupos de WhatsApp pra gerenciar as entregas... Virou uma bagunça completa.",
+      "Preciso que sua empresa crie nosso aplicativo nativo do zero.",
+      "Os requisitos fundamentais são: GPS integrado rodando em background (tempo real), e um sistema de checkout com pagamento via PIX super rápido.",
+      "E detalhe: tem que rodar tanto no Android quanto no iOS lisinho!"
+    ]
   },
   {
     id: "SCN-003",
@@ -40,7 +56,14 @@ export const scenarios: Scenario[] = [
     role: "Diretor de TI",
     projectType: "API",
     complexity: "Alta",
-    briefing: "Bom dia. Sou o Diretor de TI do Banco Trust. Estamos modernizando nosso core bancário legado de 1998. Necessitamos de uma arquitetura de API Gateway ultra segura, orientada a microserviços, com banco de dados relacional parrudo. Um bug aqui e nós perdemos milhões, então foco em segurança e transações ACID."
+    briefing: [
+      "Bom dia.",
+      "Sou o Diretor de TI do Banco Trust.",
+      "Estamos passando por uma fase tensa de modernização do nosso core bancário, que é legado e roda desde 1998.",
+      "Necessitamos de uma arquitetura de API Gateway ultra segura, fortemente tipada e puramente orientada a microserviços.",
+      "O banco de dados precisa ser relacional, parrudo e distribuído.",
+      "Nesse projeto, um bug minúsculo e nós perderemos milhões. Portanto, foco absoluto na segurança e certifiquem-se de desenhar transações ACID perfeitas."
+    ]
   },
   {
     id: "SCN-004",
@@ -50,7 +73,14 @@ export const scenarios: Scenario[] = [
     role: "Founder & CMO",
     projectType: "Mobile App",
     complexity: "Baixa",
-    briefing: "Oieeee pessoal da eng!! Sou a Cami do PetGram! Minha ideia é genial: um Tinder, só que pra cachorros marcarem passeios no parque. Quero um app super colorido, feed de fotos rolando rápido, e backend que aguente muiiita foto pesada de Golden Retriever. Bora codar? 🐾"
+    briefing: [
+      "Oieeee pessoal da engenharia!!",
+      "Sou a Cami do PetGram! Minha ideia é tipo genial cara...",
+      "Eu quero criar um Tinder, só que feito exclusivamente pra cachorros marcarem passeios no parque!",
+      "Eu quero um app super hiper colorido, com um feed de fotos que role bem rápido estilo TikTok.",
+      "O nosso backend tem que aguentar muiiita foto pesada da galera subindo vídeo de Golden Retriever toda hora.",
+      "Bora codar isso acontecer? 🐾"
+    ]
   },
   {
     id: "SCN-005",
@@ -60,7 +90,14 @@ export const scenarios: Scenario[] = [
     role: "Gerente Operacional",
     projectType: "Desktop",
     complexity: "Alta",
-    briefing: "Saudações. Aqui é o Gerente Operacional do porto. Temos centenas de contêineres entrando todo dia e o sistema atual vive caindo na rede interna dos navios. Queremos um sistema Desktop nativo, robusto, que comunique com os guindastes via rede local. Sem invenções Cloud, o mar não tem Wi-Fi 100% do tempo."
+    briefing: [
+      "Saudações, marujos.",
+      "Aqui é o Gerente Operacional do porto.",
+      "Temos centenas de contêineres colossais entrando todos os dias e o sistema atual vive caindo na rede interna dos navios, gerando prejuízos incalculáveis no embarque.",
+      "Queremos que vocês construam um sistema Desktop nativo.",
+      "Ele deve ser fechado e robusto, sem muita frescura de UI, que faça comunicação com os guindastes via rede local TCP/IP.",
+      "E sem invenções mágicas de Cloud Computing vitalícia. O mar não tem Wi-Fi 100% do tempo, então garantam a persistência offline em rede restrita!"
+    ]
   },
   {
     id: "SCN-006",
@@ -70,7 +107,14 @@ export const scenarios: Scenario[] = [
     role: "Chefe Médica",
     projectType: "Web App",
     complexity: "Média",
-    briefing: "Boa tarde. Sou a Dra. Sônia. A nova LGPD está aí e nossas vídeo-chamadas via Skype não são seguras. Preciso de um portal Web App de Telemedicina criptografado ponta-a-ponta com agendamento integrado. O sigilo do paciente é prioridade zero, ok?"
+    briefing: [
+      "Boa tarde, especialistas.",
+      "Sou a Dra. Sônia.",
+      "Com a nova aprovação da LGPD rigorosa, nossas vídeo-chamadas via Skype no consultório tornaram-se legalmente irregulares e não são seguras para uso médico.",
+      "Contratamos vocês para desenvolver um Web App de Telemedicina 100% criptografado de ponta-a-ponta.",
+      "Lembrem-se que os requisitos envolvem também um agendamento integrado via calendário relacional.",
+      "Repito: O sigilo do quadro clínico do paciente é prioridade zero. Escolham a infraestrutura de dados a dedo."
+    ]
   },
   {
     id: "SCN-007",
@@ -80,7 +124,14 @@ export const scenarios: Scenario[] = [
     role: "Lead Data Scientist",
     projectType: "Data Pipeline",
     complexity: "Alta",
-    briefing: "E aí, devs! Eduardo aqui. Tô liderando a parte de M.L da NeuralAnalytics. Nossos modelos estão com fome de dados. Quero que construam um Data Pipeline parrudíssimo que puxe dados do Twitter, processe sentimentos e jogue num Data Warehouse gigante. Use linguagens focadas em IA e dados massivos por favor."
+    briefing: [
+      "E aí, devs! Eduardo aqui.",
+      "Tô liderando a parte de M.L (Machine Learning) da NeuralAnalytics.",
+      "Direto ao ponto: nossos modelos preditivos estão com fome absurda de dados limpos.",
+      "Quero que vocês construam um Data Pipeline parrudíssimo pro nosso novo sistema.",
+      "O objetivo do software é pescar dados de streamings como o Twitter, processar os textos para análise de sentimentos e empilhar tudo assincronamente em um Data Warehouse mastodôntico.",
+      "Por favor, adotem a melhor arquitetura de ETL e não fujam das linguagens performáticas."
+    ]
   },
   {
     id: "SCN-008",
@@ -90,7 +141,14 @@ export const scenarios: Scenario[] = [
     role: "Latifundiário",
     projectType: "IoT",
     complexity: "Alta",
-    briefing: "Opa, bom dia moçada. Tenho 20 mil hectares de soja. Comprei uns sensores de solo modernosos. Quero um sistema de Internet das Coisas (IoT). O milho não espera a internet voltar. Onde a internet for fraca, faz eles mandarem os dados de pacote pequeno mesmo. Confio em vocês."
+    briefing: [
+      "Opa, bom dia moçada da cidade grande.",
+      "Eu tenho um pouco mais de 20 mil hectares de área de plantio de soja no interior.",
+      "Comprei aquelas caixinhas de sensores de solo recém-lançadas da China...",
+      "Preciso de uma plataforma focada em Internet das Coisas (IoT) pra controlar o irrigamento automático da safra.",
+      "Mas pensem numa coisa: lá tem sinal oscilando muito. Então a arquitetura precisa despachar pacotes ultraleves de métrica para os satélites de forma resiliente usando protocolos como MQTT.",
+      "Confio no time de vocês, hein. Dinheiro não falta, é só não me decepcionar."
+    ]
   },
   {
     id: "SCN-009",
@@ -100,7 +158,13 @@ export const scenarios: Scenario[] = [
     role: "Growth Hacker",
     projectType: "Web App",
     complexity: "Média",
-    briefing: "Fala time!! Fernando do Growth! Preciso de um SaaS que automatize disparo de emails e crie funis dinâmicos em tempo real com eventos Kafka. Tem que ser uma arquitetura que aguente picos absurdos se o cliente vier do BBB! Sem gargalo no banco!"
+    briefing: [
+      "Fala meeeeeeeeeeeeeu time!! Fernando do Growth na área!",
+      "Nós somos agressivos nas metas e nossa ferramenta de envio atual tá nos afundando e perdendo leads quentes.",
+      "Preciso encomendar um SaaS com vocês. O objetivo central é disparar milhōes de emails e capturas instantâneas baseadas num motor reativo de filas.",
+      "A estrutura do app em si deve gerar funis de campanha ao vivo. Eu diria que eventos assíncronos (como Apache Kafka) seriam fundamentais e obrigatórios.",
+      "Não deixem gargalos no Banco de Dados pelo amor de deus!"
+    ]
   },
   {
     id: "SCN-010",
@@ -110,7 +174,14 @@ export const scenarios: Scenario[] = [
     role: "Coordenadora EAD",
     projectType: "Web App",
     complexity: "Baixa",
-    briefing: "Olá, boa tarde! Sou a Marcela. A pandemia adiantou nossos planos online. Precisamos de um AVA (Ambiente Virtual) que rode vídeos pesados pra milhões de alunos sem travar a nuvem. Uma arquitetura ágil de video-streaming."
+    briefing: [
+      "Olá, boa tarde a todos!",
+      "Meu nome é Marcela e coordeno as atividades teóricas do grupo EducaPlus.",
+      "Tivemos que mudar as coisas muito rápido pra plataforma digital nos últimos anos.",
+      "A gente precisa migrar para um AVA (Ambiente Virtual de Aprendizagem) sob medida desenvolvido especialmente para nossos mais de 8 mil alunos online na plataforma.",
+      "Muitos estudantes possuem laptops simples, então criem um cliente web leve.",
+      "E caprichem num bucket cloud forte para os vídeos pesados."
+    ]
   },
   {
     id: "SCN-011",
@@ -120,7 +191,13 @@ export const scenarios: Scenario[] = [
     role: "Supervisor",
     projectType: "API",
     complexity: "Baixa",
-    briefing: "Olá. Quero uma API de chatbot neural que intercepta e responde nossos clientes antes de chegar num humano. Quero escalabilidade e redução de fila. Uma base NoSQL basta pros logs."
+    briefing: [
+      "Olá.",
+      "O setor de reclamações tem 3 horas de fila de espera neste exato momento.",
+      "Isso é inaceitável. Quero encomendar uma API de chatbot neural independente.",
+      "O que ela vai fazer? Simples, vai interceptar todos os clientes impacientes nas pontas (WhatsApp, redes sociais, chat web) e filtrar 60% deles com respostas rápidas tiradas de uma Base de Conhecimento.",
+      "Dessa vez um pilar de Logs NoSQL vai dar conta de registrar tudo sem ferver a máquina."
+    ]
   },
   {
     id: "SCN-012",
@@ -130,24 +207,24 @@ export const scenarios: Scenario[] = [
     role: "Co-Founder",
     projectType: "Web App",
     complexity: "Alta",
-    briefing: "Bilionários, beleza? Aqui é o Arthur. Vamos criar a próxima grande exchange do Brasil. Requisitos: microsserviços blindados e cache em memória (Redis) absurdo de rápido. O delay de 1 segundo custa dinheiro no trade."
+    briefing: [
+      "Bilionários, beleza?",
+      "Aqui é o Arthur. Fundo a CoinBR mês que vem.",
+      "Nós vamos amassar os concorrentes institucionais batendo em UX e taxa-zero no spot trade.",
+      "Pra isso, a nossa arquitetura técnica inteira tem que ser absurdamente afiada a níveis ridículos. Uma latência de meio segundo custa a vida financeira nossa e dos usuários.",
+      "Desenhem microsserviços blindados com cache em memória fortíssimo (como Redis).",
+      "É vida real. É dinheiro global."
+    ]
   },
-  { id: "SCN-013", theme: "App de Fitness", company: "GymBros", stakeholder: "Leo Stronda", role: "Personal Star", projectType: "Mobile App", complexity: "Baixa", briefing: "E aíí! Bora fazer o maior app de treino do mundo. Monólito ou qualquer coisa, desde que saia rápido pra Android e iOS. Quero gamificação!" },
-  { id: "SCN-014", theme: "Gerenciador de Estacionamentos", company: "ParkAuto", stakeholder: "Carlos B.", role: "Dono", projectType: "IoT", complexity: "Média", briefing: "Boa tarde, Carlos da ParkAuto. Nossas cancelas precisam comunicar via IoT com uma nuvem central pra checar o cartão do cliente e abrir. Pode usar SQL simples." },
-  { id: "SCN-015", theme: "Sistema de Folha de Pagamento", company: "RH Solutions", stakeholder: "Fátima Mendes", role: "Gerente HR", projectType: "Desktop", complexity: "Baixa", briefing: "Olá! Precisamos de um software Desktop seguro para o sistema de pagamento dos nossos 50 mil funcionários e gerar boletos." },
-  { id: "SCN-016", theme: "Buscador de Passagens Aéreas", company: "VoaLá", stakeholder: "Tiago Silva", role: "Product Owner", projectType: "Web App", complexity: "Alta", briefing: "Olá time! Precisamos de um motor web que faz crawler nas aéreas em tempo real. Exige forte carga concorrente e cache (Redis) gigante!" },
-  { id: "SCN-017", theme: "App de Meditação", company: "ZenLife", stakeholder: "Mestra Luiza", role: "Guru Mestre", projectType: "Mobile App", complexity: "Baixa", briefing: "Paz. Quero um app minimalista onde os usuários toquem o áudio offline e subam seu humor na nuvem de forma eventual." },
-  { id: "SCN-018", theme: "Gateway de Pagamento", company: "PayTux", stakeholder: "Rick CFO", role: "Diretor", projectType: "API", complexity: "Alta", briefing: "Fala. Nosso card-processing requer PCI-Compliance, relacional robusto (Postgres) e não pode falhar NUNCA. Linguagem tipada obrigatória." },
-  { id: "SCN-019", theme: "Monitor de Trânsito Cidades", company: "GovBR", stakeholder: "Prefeito Marcos", role: "Político", projectType: "IoT", complexity: "Alta", briefing: "Boa tarde aos desenvolvedores. Nossas 20 mil câmeras de trânsito emitem streams constantes. Precisamos de um sistema real-time via Kafka pra acionar a polícia." },
-  { id: "SCN-020", theme: "Análise de DNA", company: "GeneSys", stakeholder: "Doutor Victor", role: "Pesquisador", projectType: "Data Pipeline", complexity: "Média", briefing: "Olá laboratório! Minha equipe minera genomas pesando Terabytes. Construa pipelines em Python/Go jogando tudo no Data Warehouse rápido!" },
-  { id: "SCN-021", theme: "Jogo Multiplayer Web", company: "IndieDevZ", stakeholder: "Gui Player", role: "Gamedev", projectType: "Web App", complexity: "Média", briefing: "Iae galere, quero um app Web com Websockets, evento atrás de evento. Não pode ter lag. Escolham bem a arquitetura." },
-  { id: "SCN-022", theme: "Controle de Frigorífico", company: "Boiadeiro", stakeholder: "Clóvis", role: "Dono", projectType: "Desktop", complexity: "Baixa", briefing: "Opa. Computador de matadouro não tem cloud chic né. Me faz um desktop que imprime etiqueta e não enche o saco." },
-  { id: "SCN-023", theme: "App de Encontros Sugar", company: "Docinho", stakeholder: "Patrícia D.", role: "Founder", projectType: "Mobile App", complexity: "Média", briefing: "Oizinho! Queremos um app mobile. A arquitetura precisa esconder nossos dados pra não dar vazamento por LGPD! Segurança alta no SQL!" },
-  { id: "SCN-024", theme: "CRM de Advogados", company: "DireitoJá", stakeholder: "Dr. Lemos", role: "Sócio Sênior", projectType: "Web App", complexity: "Média", briefing: "Boa tarde. Precisamos de um CRM Web com busca de textos completa para milhares de processos em PDF. Banco de Dados robustos e busca rápida." },
-  { id: "SCN-025", theme: "Previsão do Tempo AI", company: "Weathr", stakeholder: "Clara S.", role: "Meteorologista", projectType: "Data Pipeline", complexity: "Alta", briefing: "Estão me ouvindo? O clima de amanhã depende de Big Data hoje. Spark pipeline processando peta de informações térmicas pro D.Ware." },
-  { id: "SCN-026", theme: "Gerador de Memes Web3", company: "DogeMeme", stakeholder: "Kyle", role: "CryptoBro", projectType: "Web App", complexity: "Baixa", briefing: "WAGMI guys! Só me larga um appzinho onde arrasta a foto, cunha um Nft e faz checkout web3 na nuvem com React e Node. Foguete nao tem ré." },
-  { id: "SCN-027", theme: "Monitoramento de Idosos Isolados", company: "CuidAR", stakeholder: "Dona Maria", role: "Diretora da ONG", projectType: "IoT", complexity: "Média", briefing: "Boa tarde, jovens. Queremos conectar relógios nos idosos e nossos servidores devem alertar o posto médico. Não pode falhar o banco de dados." },
-  { id: "SCN-028", theme: "Frente de Caixa Supermercado", company: "Mercado Dois Irmãos", stakeholder: "Seu Zé", role: "Gerente", projectType: "Desktop", complexity: "Baixa", briefing: "Bom dia. Minhas caixas ficam offline e sem rede. O programa tem q ser no Windows mesmo (Desktop) gravando no disco depois sobe pra nuvem." },
-  { id: "SCN-029", theme: "Streaming de Rádio", company: "FM Mais", stakeholder: "DJ Rato", role: "Locutor", projectType: "Mobile App", complexity: "Baixa", briefing: "Baaaaao meu povo! Ouve aí, quero os aplicativo dos ouvinte doidão, manda som na orelha e aceita pedido de música ao vivasso." },
-  { id: "SCN-030", theme: "Detecção de Fraudes de Cartão", company: "BankSecure", stakeholder: "Cel. Matias", role: "Head of Security", projectType: "API", complexity: "Alta", briefing: "Escute com atenção: APIs restritas e sigilosas, Machine Learning online validando em nanosegundos as compras em nosso Graph DB. Cumpra a missão." }
+  { id: "SCN-013", theme: "App de Fitness", company: "GymBros", stakeholder: "Leo Stronda", role: "Personal Star", projectType: "Mobile App", complexity: "Baixa", briefing: ["E aíí!", "Bora lançar o maior app de treino das lojas Apple e Android em tempo recorde cara! As pessoas sentem dificuldade em ter uma rotina.", "O sistema nem precisa ser tãao parrudo hoje. Pode usar um backend mais simples na largada até validar com os primeiros clientes.", "O foco deve ser um Frontend insano em Mobile."] },
+  { id: "SCN-014", theme: "Gerenciador de Cancelas", company: "ParkAuto", stakeholder: "Carlos B.", role: "Dono", projectType: "IoT", complexity: "Média", briefing: ["Boa tarde, aqui é o Carlos da ParkAuto.", "Preciso interligar todas as catracas do nosso estacionamento particular numa infraestrutura Cloud nativa.", "As catracas vão emitir ping via IoT em uma controladora mestre pra checar se o cartão do mensalista compensou em saldo e logo então liberar a porta.", "Use um Cloud simples e um BD seguro."] },
+  { id: "SCN-015", theme: "Folha de Pagamentos", company: "RH Solutions", stakeholder: "Fátima Mendes", role: "Gerente HR", projectType: "Desktop", complexity: "Baixa", briefing: ["Olá, time de tecnologia!", "Nossas empresas clientes exigem níveis absurdos de sigilo legal de impostos nas transações financeiras.", "Precisamos de um App Desktop pesado em que o contador faz o fechamento local e o sistema encriptografado apenas sinca com um banco central as apurações."] },
+  { id: "SCN-016", theme: "Buscador de Passagens Aéreas", company: "VoaLá", stakeholder: "Tiago Silva", role: "Product Owner", projectType: "Web App", complexity: "Alta", briefing: ["Olá time!", "A gente tá num oceano vermelho contra a 123Milhas e Decolar hoje... Precisamos de um novo motor de buscas pra passagens.", "O sistema precisa despachar Crawler/Scrapings em múltiplas companhias aéreas simultaneamente com milhões de threads.", "Concorrência bruta, CACHE altíssimo. Boa sorte."] },
+  { id: "SCN-017", theme: "App de Meditação", company: "ZenLife", stakeholder: "Mestra Luiza", role: "Guru Mestre", projectType: "Mobile App", complexity: "Baixa", briefing: ["Que o universo respire junto conosco...", "Eu tenho uma comunidade maravilhosa querendo os meus guias diários.", "Vocês fariam a gentileza de arquitetar um app simples, aconchegante, sem muita firula que o pessoal dê o play no fone de ouvido nos trens sem gastar muitos dados?", "Um BD NoSQL pra guardar os perfis já é amável."] },
+  { id: "SCN-018", theme: "Gateway de Múltiplos Pagamentos", company: "PayTux", stakeholder: "Rick CFO", role: "Diretor Financeiro", projectType: "API", complexity: "Alta", briefing: ["Fala galera.", "Sou bem objetivo com o negócio. Nosso card-processing não para de rodar na Amazon gerando dinheiro absurdo dia após dia. Nós queremos refazer ele do zero em casa na nossa equipe.", "Linguagem Altamente Tipada.", "PCI-Compliance em mente. Relacional Forte e que não se permita Double Spending (compra que processa e debita duas vezes)... Façam as magias de vocês."] },
+  { id: "SCN-019", theme: "Monitor de Trânsito Cidades", company: "GovBR", stakeholder: "Prefeito Marcos", role: "Político Municipal", projectType: "IoT", complexity: "Alta", briefing: ["Boa tarde aos diretores do projeto da empresa de vocês.", "Nosso município precisa entrar na Era Digital logo ou eu nao me reelejo no fim do ciclo.", "A prefeitura tá com 20 mil câmeras novas adquiridas espalhadas nos semáforos, preciso de um ecossistema IoT gigantesco com Kafka ou Filas de alta resistência.", "Se virem. Paguem meu SLA."] },  
+  { id: "SCN-020", theme: "Análise de DNA", company: "GeneSys", stakeholder: "Doutor Victor", role: "Pesquisador", projectType: "Data Pipeline", complexity: "Média", briefing: ["Olá, laboratório virtual!", "Aqui extraímos, mineramos e desconstruímos o genoma humano gerando Terabytes de log ininteligível pro homem mas perfeito pras máquinas.", "A gente necessita de um Pipeline de Dados em linguagens fortíssimas como Golang/Rust/Python atreladas a um Data Lake infinito. Tá feito o pedido."] },
+  { id: "SCN-021", theme: "Jogo Multiplayer Web", company: "IndieDevZ", stakeholder: "Gui Player", role: "Gamedev Indie", projectType: "Web App", complexity: "Média", briefing: ["Iae galereeeee!", "Meu joguinho anterior bombou na Twitch ontem, já lancei um KickStarter que juntou uma grana violenta hoje... Eu decidi que vou tercerizar o Backend do meu novo Server-Side Game.", "Isso tem que ser de última, com zero lags de rede em Websockets síncronos.", "Estudem bem o backend node que vocês vão desenhar porque os players não aceitam Ping Alto!"] },  
+  { id: "SCN-022", theme: "Controle de Frigorífico", company: "Boiadeiro Carnes", stakeholder: "Clóvis", role: "Dono", projectType: "Desktop", complexity: "Baixa", briefing: ["Opa... Beleza menino??", "Cê sabe que computador de matadouro vive cheio de sangue bovino em cima do teclado e não tem essas cloud chique que você vende pras startup não.", "Aqui o sistema roda em cima da câmara gélida e se travar apita tudo no almoxarife.", "Quero um treco que funciona offline no rwindows rodando leve.", "Dá pra fazer pra ontem?"] },
+  { id: "SCN-023", theme: "App de Encontros Premium", company: "Docinho", stakeholder: "Patrícia D.", role: "Founder", projectType: "Mobile App", complexity: "Média", briefing: ["Oizinho equipe!", "É verdade que vocês entregam um produto final em pouquíssimos dias de Sprints e Planejamento arquitetural?", "Queremos um app de encontros com UX formidável voltado ao mercado AA de grana.", "O banco de dados de Matches precisa ser incrivelmente sigiloso, por conta que os ricaços temem por sua LGPD... Usem Criptografia sólida nesse projeto pf :3"] },
 ];

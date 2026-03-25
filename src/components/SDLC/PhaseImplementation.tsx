@@ -48,7 +48,6 @@ const hackerCodeSnippets = [
 ];
 
 const PhaseImplementation = ({ stats, scenario, onComplete }: PhaseImplementationProps) => {
-  const sprintDurationMs = (stats?.time || 3) * 3000; 
   const stages = projectStages[scenario.projectType] || ['Análise', 'Desenvolvimento', 'Testes'];
   
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
@@ -59,6 +58,7 @@ const PhaseImplementation = ({ stats, scenario, onComplete }: PhaseImplementatio
   const [bugsSquashed, setBugsSquashed] = useState(0);
   const [missedBugs, setMissedBugs] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
+  const [dynamicBugRisk, setDynamicBugRisk] = useState(stats?.bugRisk || 1);
 
   // Hacker typing states
   const [typedLines, setTypedLines] = useState<CodeLine[]>([]);
@@ -77,36 +77,35 @@ const PhaseImplementation = ({ stats, scenario, onComplete }: PhaseImplementatio
   useEffect(() => {
     if (!isStageRunning) return;
 
-    let startTime = Date.now();
     let isRunning = true;
 
-    // Progress Bar Loop
+    // Progress Bar Loop (Lento progressivo passivo. Maior avanço vem ao squassar bugs)
     const progressInterval = setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      const percent = Math.min((elapsed / sprintDurationMs) * 100, 100);
-      setProgress(percent);
+      setProgress(prev => {
+         const next = prev + 0.4; // Progresso natural constante (4% por segundo)
+         if (next >= 100) {
+           clearInterval(progressInterval);
+           setIsStageRunning(false);
+           isRunning = false;
 
-      if (percent >= 100) {
-        clearInterval(progressInterval);
-        setIsStageRunning(false);
-        isRunning = false;
-
-        // Limpa erros ao passar de etapa
-        if (currentStageIndex < stages.length - 1) {
-          setCurrentStageIndex(c => c + 1);
-          setProgress(0);
-          toast.success(`Etapa "${stages[currentStageIndex]}" concluída! Inicie a próxima.`);
-        } else {
-          setIsFinished(true);
-        }
-      }
+           if (currentStageIndex < stages.length - 1) {
+             setCurrentStageIndex(c => c + 1);
+             setProgress(0);
+             toast.success(`Etapa "${stages[currentStageIndex]}" concluída! Inicie a próxima.`);
+           } else {
+             setIsFinished(true);
+           }
+           return 100;
+         }
+         return next;
+      });
     }, 100);
 
-    // Bug Spawner Loop
-    const spawnRate = Math.max(800, 3000 - (stats.bugRisk * 30)); 
+    // Bug Spawner Loop (Baseado no Risco Dinâmico que escala)
+    const spawnRate = Math.max(500, 3000 - (dynamicBugRisk * 300)); 
     const spawnInterval = setInterval(() => {
       if (!isRunning) return;
-      if (Math.random() * 100 < stats.bugRisk * 1.5) {
+      if (Math.random() * 100 < dynamicBugRisk * 5) {
         spawnBug();
       }
     }, spawnRate);
@@ -116,7 +115,7 @@ const PhaseImplementation = ({ stats, scenario, onComplete }: PhaseImplementatio
       clearInterval(spawnInterval);
       isRunning = false;
     };
-  }, [isStageRunning, currentStageIndex, sprintDurationMs, stats.bugRisk, stages]);
+  }, [isStageRunning, currentStageIndex, dynamicBugRisk, stages]);
 
   // Hacker Typing Effect Loop
   useEffect(() => {
@@ -145,21 +144,25 @@ const PhaseImplementation = ({ stats, scenario, onComplete }: PhaseImplementatio
     return () => { isTyping = false; };
   }, [isStageRunning, activeBugs.length, progress]);
 
-  // Bug expiration
+  // Bug expiration (Penalidade)
   useEffect(() => {
-    if (activeBugs.length > 0 && !isFinished) {
+    if (activeBugs.length > 0 && !isFinished && isStageRunning) {
       const timer = setTimeout(() => {
         setActiveBugs(prev => {
           if (prev.length > 0) {
             setMissedBugs(m => m + 1);
+            // Penalidade: Perde progresso e aumenta a chance de novos bugs
+            setProgress(p => Math.max(0, p - 6));
+            setDynamicBugRisk(r => Math.min(10, r + 1.5));
+            toast.error('Bug Vazado! Progresso reduzido.', { style: { fontSize: '0.8rem' } });
             return prev.slice(1);
           }
           return prev;
         });
-      }, 3000); 
+      }, 3500); 
       return () => clearTimeout(timer);
     }
-  }, [activeBugs, isFinished]);
+  }, [activeBugs, isFinished, isStageRunning]);
 
   const spawnBug = () => {
     if (!containerRef.current) return;
@@ -177,6 +180,17 @@ const PhaseImplementation = ({ stats, scenario, onComplete }: PhaseImplementatio
     e.stopPropagation();
     setActiveBugs(prev => prev.filter(b => b.id !== id));
     setBugsSquashed(prev => prev + 1);
+    
+    // Bônus: Avança muito rápido a sprint ao resolver bugs e limpa a área diminuindo o risco
+    setProgress(p => {
+       const next = p + 15;
+       if (next >= 100 && isStageRunning) {
+          // forces completion loop to catch up immediately
+          setTimeout(() => setProgress(100), 10);
+       }
+       return Math.min(100, next);
+    });
+    setDynamicBugRisk(r => Math.max(0.5, r - 0.8));
   };
 
   const startNextStage = () => {

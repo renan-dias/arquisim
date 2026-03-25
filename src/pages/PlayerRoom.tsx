@@ -12,6 +12,7 @@ import PhaseImplementation from '../components/SDLC/PhaseImplementation';
 import PhaseDomain from '../components/SDLC/PhaseDomain';
 import PhaseReview from '../components/SDLC/PhaseReview';
 import PhaseLaunch from '../components/SDLC/PhaseLaunch';
+import GlobalNotepad from '../components/GlobalNotepad';
 
 import { scenarios } from '../data/scenarios';
 import type { Scenario } from '../data/scenarios';
@@ -237,6 +238,7 @@ const PlayerRoom = () => {
           </motion.div>
         )}
       </main>
+      <GlobalNotepad />
     </div>
   );
 };

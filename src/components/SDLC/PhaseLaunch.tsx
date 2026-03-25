@@ -225,6 +225,18 @@ const PhaseLaunch = ({ stats, bugs, currentMoney, companyName, studentName, proj
     doc.text('Tráfego Constante Observado', 25, 190); doc.text('Medido via Dashboard', 150, 190);
     doc.line(20, 194, 190, 194);
 
+    // --- Page 5: Anotações do Arquiteto (Notepad Global) ---
+    const savedNotes = localStorage.getItem('arquisim_notepad');
+    if (savedNotes && savedNotes.trim().length > 0) {
+      doc.addPage();
+      addHeader('4. Rascunhos e Notas (Apenso)', (doc.internal as any).getNumberOfPages());
+      
+      doc.setFontSize(10);
+      doc.setTextColor(80, 80, 80);
+      const splitNotes = doc.splitTextToSize(savedNotes, 170);
+      doc.text(splitNotes, 20, 50);
+    }
+
     doc.save(`ArquiSim_SAD_${companyName.replace(/ /g, '_')}.pdf`);
     toast.success('Documento Profissional (SAD) gerado com sucesso!');
   };
