@@ -9,6 +9,8 @@ export interface Scenario {
   budgetMsg?: string;
   timeMsg?: string;
   complexity: 'Baixa' | 'Média' | 'Alta';
+  budgetMin?: number;
+  budgetMax?: number;
 }
 
 export const scenarios: Scenario[] = [
