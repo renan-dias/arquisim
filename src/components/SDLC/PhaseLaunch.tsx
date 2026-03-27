@@ -15,6 +15,8 @@ import {
 
 import { jsPDF } from 'jspdf';
 import toast from 'react-hot-toast';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '../../services/firebase';
 
 ChartJS.register(
   CategoryScale,
@@ -27,6 +29,8 @@ ChartJS.register(
 );
 
 interface PhaseLaunchProps {
+  roomId: string;
+  playerId: string;
   stats: any;
   bugs: number;
   currentMoney: number;
@@ -35,7 +39,7 @@ interface PhaseLaunchProps {
   projectData: any;
   scenario: any;
   onUpdateMoney: (newTotal: number) => void;
-  onLaunchUpdate: () => void;
+  onLaunchUpdate: (featureName: string, featureDesc: string) => void;
 }
 
 const userNames = ['@maria_dev', '@joaosilva', '@cyber_punk', '@carlos_ti', '@ana_business', 'contato@cliente.com', '@tech_guru', 'suporte@empresa.br'];
@@ -58,20 +62,20 @@ const praisesPool = [
   "10/10 - Recomendo pra todas as empresas parceiras!"
 ];
 
-const competitorsPool = [
-  { name: 'TechCorp', share: 35 },
-  { name: 'ByteWorks', share: 20 },
-  { name: 'InovaSys', share: 15 },
-  { name: 'IndieDevs', share: 5 }
-];
 
-const PhaseLaunch = ({ stats, bugs, currentMoney, companyName, studentName, projectData, scenario, onUpdateMoney, onLaunchUpdate }: PhaseLaunchProps) => {
+
+const PhaseLaunch = ({ roomId, playerId, stats, bugs, currentMoney, companyName, studentName, projectData, scenario, onUpdateMoney, onLaunchUpdate }: PhaseLaunchProps) => {
   const [salesData, setSalesData] = useState<number[]>([]);
   const [costData, setCostData] = useState<number[]>([]);
   const [labels, setLabels] = useState<string[]>([]);
   
   const [consoleLogs, setConsoleLogs] = useState<{ time: string; msg: string; type: 'sale' | 'complaint' | 'praise' | 'info'; author?: string }[]>([]);
-  const [competitors, setCompetitors] = useState(competitorsPool);
+  const [competitors, setCompetitors] = useState<{ name: string; share: number; appName?: string }[]>([]);
+  const [myShare, setMyShare] = useState(100);
+
+  const [isFeatureModalOpen, setIsFeatureModalOpen] = useState(false);
+  const [featureName, setFeatureName] = useState('');
+  const [featureDesc, setFeatureDesc] = useState('');
 
   const initialStars = Math.max(0, 5 - (bugs * 0.5));
   const [rating, setRating] = useState(initialStars);
@@ -247,13 +251,50 @@ const PhaseLaunch = ({ stats, bugs, currentMoney, companyName, studentName, proj
     }
   }, [consoleLogs]);
 
+  // PvP Realtime Market Share Sync
+  useEffect(() => {
+    if (!roomId) return;
+    const playersRef = collection(db, 'rooms', roomId, 'players');
+    const unsub = onSnapshot(playersRef, (snapshot) => {
+      const activePlayers = snapshot.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .filter((p: any) => p.currentPhase >= 7); // Somente concorrentes lançados
+      
+      let totalStars = 0;
+      activePlayers.forEach((p: any) => {
+         const pBugs = p.projectData?.bugs || 0;
+         const pRating = Math.max(0, 5 - (pBugs * 0.5));
+         totalStars += pRating;
+      });
+
+      if (totalStars === 0) totalStars = 1; // Evitar divisão por zero
+
+      const mappedCompetitors = activePlayers.map((p: any) => {
+         const pBugs = p.projectData?.bugs || 0;
+         const pRating = Math.max(0, 5 - (pBugs * 0.5));
+         const share = Math.round((pRating / totalStars) * 100);
+         
+         if (p.id === playerId) {
+            setMyShare(share); 
+            return { name: `${p.companyName} (Você)`, share, appName: p.scenario?.company };
+         }
+         return { name: p.companyName, share, appName: p.scenario?.company };
+      }).sort((a, b) => b.share - a.share);
+
+      setCompetitors(mappedCompetitors);
+    });
+    return () => unsub();
+  }, [roomId, playerId]);
+
   useEffect(() => {
     let internalMoney = currentMoney;
 
     const interval = setInterval(() => {
-      // Logic loop every 3 seconds
+      // Loop Econômico base de 3s
+      // Mercado Total do player depende apenas da Cota de Mercado global em PvP e do seu Rating
+      const baseMarketPool = 3000 + (rating * 1000); 
+      let nextSale = (baseMarketPool * (myShare / 100)) + (Math.random() * 200);
       
-      let nextSale = 1000 + (rating * 400) + (Math.random() * 500);
       if (bugs > 5) nextSale -= 800; // Penalidade grave
       nextSale = Math.max(0, nextSale);
 
@@ -284,14 +325,8 @@ const PhaseLaunch = ({ stats, bugs, currentMoney, companyName, studentName, proj
         if (next.length > 10) next.shift();
         return next;
       });
-
-      // Competitor shift
-      setCompetitors(prev => {
-        return prev.map(c => ({
-          ...c,
-          share: Math.max(1, Math.min(60, c.share + (Math.random() > 0.5 ? 1 : -1)))
-        })).sort((a,b) => b.share - a.share);
-      });
+      
+      // Competitor shift was removed as it's purely driven by Realtime Firebase Data now
 
       // Events Log Generator
       if (delta > 0 && Math.random() > 0.5) {
@@ -313,7 +348,7 @@ const PhaseLaunch = ({ stats, bugs, currentMoney, companyName, studentName, proj
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [stats, bugs, rating]); // Removed currentMoney and onUpdateMoney to avoid frequent reset of loop
+  }, [stats, bugs, rating, myShare]); // Depende do myShare dinâmico
 
   const data = {
     labels,
@@ -349,9 +384,10 @@ const PhaseLaunch = ({ stats, bugs, currentMoney, companyName, studentName, proj
   };
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
+    <>
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
       className="glass-panel"
       style={{ padding: '2rem', maxWidth: '1200px', width: '100%', display: 'flex', flexDirection: 'column', gap: '2rem' }}
     >
@@ -392,8 +428,8 @@ const PhaseLaunch = ({ stats, bugs, currentMoney, companyName, studentName, proj
              <span style={{ fontWeight: 'bold' }}>{bugs} Bugs Críticos</span>
            </div>
 
-           <button onClick={onLaunchUpdate} className="btn-premium" style={{ background: 'var(--primary-color)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-             <RefreshCw size={18} /> Lançar Update/Fix
+           <button onClick={() => setIsFeatureModalOpen(true)} className="btn-premium" style={{ background: 'var(--primary-color)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+             <RefreshCw size={18} /> Lançar Nova Feature
            </button>
         </div>
       </div>
@@ -422,7 +458,7 @@ const PhaseLaunch = ({ stats, bugs, currentMoney, companyName, studentName, proj
                   {consoleLogs.map((log, i) => {
                      if (log.type === 'sale' || log.type === 'info') {
                         return (
-                           <div key={i} style={{ color: log.type === 'sale' ? '#10b981' : '#94a3b8', fontSize: '0.75rem', padding: '4px 0', fontFamily: 'monospace', borderBottom: '1px solid var(--panel-border)' }}>
+                           <div key={i} style={{ color: log.type === 'sale' ? '#10b981' : 'var(--text-secondary)', fontSize: '0.75rem', padding: '4px 0', fontFamily: 'monospace', borderBottom: '1px solid var(--panel-border)' }}>
                              [{log.time}] sys_msg: {log.msg}
                            </div>
                         );
@@ -455,6 +491,39 @@ const PhaseLaunch = ({ stats, bugs, currentMoney, companyName, studentName, proj
          </div>
       </div>
     </motion.div>
+
+      {/* MODAL: NOVA FEATURE SDLC */}
+      {isFeatureModalOpen && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+          <div className="glass-panel" style={{ padding: '2rem', width: '450px', display: 'flex', flexDirection: 'column', gap: '1rem', border: '1px solid var(--primary-color)' }}>
+             <h3 style={{ fontSize: '1.2rem', color: 'var(--text-primary)' }}>Desenvolver Nova Funcionalidade</h3>
+             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+               Isso reiniciará o ciclo a partir da Fase 2 (Planejamento UML), preservando toda a arquitetura atual em produção, permitindo empilhar expansões e consertar bugs antigos. O Live Ops continuará faturando enquanto sua dev team coda a feature nova em paralelo!
+             </p>
+             
+             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1rem' }}>
+               <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Nome do Módulo/Feature</label>
+               <input className="input-premium" type="text" placeholder="Ex: Gateway de Pagamento, Perfil Social..." value={featureName} onChange={e => setFeatureName(e.target.value)} />
+               
+               <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>Epecificação Resumida (Briefing)</label>
+               <textarea className="input-premium" style={{ height: '80px', resize: 'none' }} placeholder="Descreva brevemente a regra de negócio..." value={featureDesc} onChange={e => setFeatureDesc(e.target.value)} />
+             </div>
+
+             <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
+                <button className="btn-premium btn-secondary" style={{ flex: 1 }} onClick={() => setIsFeatureModalOpen(false)}>Cancelar</button>
+                <button className="btn-premium" style={{ flex: 1 }} onClick={() => {
+                   if (!featureName.trim()) {
+                     toast.error('Dê um nome à feature!');
+                     return;
+                   }
+                   setIsFeatureModalOpen(false);
+                   onLaunchUpdate(featureName, featureDesc);
+                }}>Investir em P&D</button>
+             </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

@@ -345,7 +345,7 @@ const PhaseImplementation = ({ stats, scenario, onComplete }: PhaseImplementatio
            >
              <CheckCircle size={64} color="#10b981" style={{ marginBottom: '1rem' }} />
              <h2 style={{ marginBottom: '0.5rem' }}>Pipeline Concluído!</h2>
-             <p style={{ color: '#94a3b8', marginBottom: '2rem' }}>A base de código foi compilada com as etapas requeridas.</p>
+             <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>A base de código foi compilada com as etapas requeridas.</p>
              <button className="btn-premium" onClick={handleFinish}>
                Ir para Registro de Domínio
              </button>

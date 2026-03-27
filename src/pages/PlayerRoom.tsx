@@ -154,11 +154,16 @@ const PlayerRoom = () => {
     }
   };
 
-  const handleUpdateRelease = async () => {
-    // Restart logic from Sprint but keeping architecture and funds
-    setCurrentPhase(4);
-    await persistPhase(4);
-    toast('Voltando para as Trincheiras! Arrumem esses bugs!', { icon: '🛠️' });
+  const handleUpdateRelease = async (featureName: string, _featureDesc: string) => {
+    // Nova Feature Lifecycle: Volta para Planejamento UML (Fase 2) mas preserva a fundação
+    setCurrentPhase(2);
+    await persistPhase(2);
+    
+    if (featureName) {
+      toast(`Iniciando o desenvolvimento da feature: ${featureName}`, { icon: '✨' });
+    } else {
+      toast('Retornando à prancheta de Modelagem...', { icon: '🏗️' });
+    }
   };
 
   const handleLiveMoneyUpdate = (newTotal: number) => {
@@ -218,11 +223,11 @@ const PlayerRoom = () => {
         
         {currentPhase === 1 && scenario && <PhaseBriefing scenario={scenario} onComplete={handleCompleteBriefing} />}
         {currentPhase === 2 && <PhasePlanning onComplete={handleCompletePlanning} />}
-        {currentPhase === 3 && <PhaseArchitecture onComplete={handleCompleteArchitecture} />}
+        {currentPhase === 3 && <PhaseArchitecture scenario={scenario} onComplete={handleCompleteArchitecture} />}
         {currentPhase === 4 && scenario && <PhaseImplementation scenario={scenario} stats={projectData.architecture?.expectedStats} onComplete={handleCompleteImplementation} />}
         {currentPhase === 5 && <PhaseDomain companyName={companyName} projectData={projectData} onComplete={handleCompleteDomain} />}
         {currentPhase === 6 && scenario && <PhaseReview scenario={scenario} projectData={projectData} onComplete={handleCompleteReview} />}
-        {currentPhase === 7 && <PhaseLaunch stats={projectData.architecture?.expectedStats} bugs={projectData.bugs} currentMoney={money} companyName={companyName} studentName={studentName} projectData={projectData} scenario={scenario} onUpdateMoney={handleLiveMoneyUpdate} onLaunchUpdate={handleUpdateRelease} />}
+        {currentPhase === 7 && <PhaseLaunch roomId={roomId as string} playerId={playerId as string} stats={projectData.architecture?.expectedStats} bugs={projectData.bugs} currentMoney={money} companyName={companyName} studentName={studentName} projectData={projectData} scenario={scenario} onUpdateMoney={handleLiveMoneyUpdate} onLaunchUpdate={handleUpdateRelease} />}
         
         {currentPhase === 999 && (
           <motion.div 

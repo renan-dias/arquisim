@@ -5,7 +5,7 @@ export interface Scenario {
   stakeholder: string;
   role: string;
   briefing: string[];
-  projectType: 'Web App' | 'Mobile App' | 'API' | 'Desktop' | 'Data Pipeline' | 'IoT';
+  projectType: 'Web App' | 'Mobile App' | 'API' | 'Desktop' | 'Data Pipeline' | 'IoT' | 'Sistema Operacional' | 'Game Engine' | 'Logística';
   budgetMsg?: string;
   timeMsg?: string;
   complexity: 'Baixa' | 'Média' | 'Alta';
@@ -88,7 +88,7 @@ export const scenarios: Scenario[] = [
     company: "PortoNave Br",
     stakeholder: "Capitão Jonas",
     role: "Gerente Operacional",
-    projectType: "Desktop",
+    projectType: "Logística",
     complexity: "Alta",
     briefing: [
       "Saudações, marujos.",
@@ -224,7 +224,8 @@ export const scenarios: Scenario[] = [
   { id: "SCN-018", theme: "Gateway de Múltiplos Pagamentos", company: "PayTux", stakeholder: "Rick CFO", role: "Diretor Financeiro", projectType: "API", complexity: "Alta", briefing: ["Fala galera.", "Sou bem objetivo com o negócio. Nosso card-processing não para de rodar na Amazon gerando dinheiro absurdo dia após dia. Nós queremos refazer ele do zero em casa na nossa equipe.", "Linguagem Altamente Tipada.", "PCI-Compliance em mente. Relacional Forte e que não se permita Double Spending (compra que processa e debita duas vezes)... Façam as magias de vocês."] },
   { id: "SCN-019", theme: "Monitor de Trânsito Cidades", company: "GovBR", stakeholder: "Prefeito Marcos", role: "Político Municipal", projectType: "IoT", complexity: "Alta", briefing: ["Boa tarde aos diretores do projeto da empresa de vocês.", "Nosso município precisa entrar na Era Digital logo ou eu nao me reelejo no fim do ciclo.", "A prefeitura tá com 20 mil câmeras novas adquiridas espalhadas nos semáforos, preciso de um ecossistema IoT gigantesco com Kafka ou Filas de alta resistência.", "Se virem. Paguem meu SLA."] },  
   { id: "SCN-020", theme: "Análise de DNA", company: "GeneSys", stakeholder: "Doutor Victor", role: "Pesquisador", projectType: "Data Pipeline", complexity: "Média", briefing: ["Olá, laboratório virtual!", "Aqui extraímos, mineramos e desconstruímos o genoma humano gerando Terabytes de log ininteligível pro homem mas perfeito pras máquinas.", "A gente necessita de um Pipeline de Dados em linguagens fortíssimas como Golang/Rust/Python atreladas a um Data Lake infinito. Tá feito o pedido."] },
-  { id: "SCN-021", theme: "Jogo Multiplayer Web", company: "IndieDevZ", stakeholder: "Gui Player", role: "Gamedev Indie", projectType: "Web App", complexity: "Média", briefing: ["Iae galereeeee!", "Meu joguinho anterior bombou na Twitch ontem, já lancei um KickStarter que juntou uma grana violenta hoje... Eu decidi que vou tercerizar o Backend do meu novo Server-Side Game.", "Isso tem que ser de última, com zero lags de rede em Websockets síncronos.", "Estudem bem o backend node que vocês vão desenhar porque os players não aceitam Ping Alto!"] },  
+  { id: "SCN-021", theme: "Jogo Multiplayer Web", company: "IndieDevZ", stakeholder: "Gui Player", role: "Gamedev Indie", projectType: "Game Engine", complexity: "Média", briefing: ["Iae galereeeee!", "Meu joguinho anterior bombou na Twitch ontem, já lancei um KickStarter que juntou uma grana violenta hoje... Eu decidi que vou tercerizar o Backend do meu novo Server-Side Game.", "Isso tem que ser de última, com zero lags de rede em Websockets síncronos.", "Estudem bem o backend node que vocês vão desenhar porque os players não aceitam Ping Alto!"] },  
   { id: "SCN-022", theme: "Controle de Frigorífico", company: "Boiadeiro Carnes", stakeholder: "Clóvis", role: "Dono", projectType: "Desktop", complexity: "Baixa", briefing: ["Opa... Beleza menino??", "Cê sabe que computador de matadouro vive cheio de sangue bovino em cima do teclado e não tem essas cloud chique que você vende pras startup não.", "Aqui o sistema roda em cima da câmara gélida e se travar apita tudo no almoxarife.", "Quero um treco que funciona offline no rwindows rodando leve.", "Dá pra fazer pra ontem?"] },
   { id: "SCN-023", theme: "App de Encontros Premium", company: "Docinho", stakeholder: "Patrícia D.", role: "Founder", projectType: "Mobile App", complexity: "Média", briefing: ["Oizinho equipe!", "É verdade que vocês entregam um produto final em pouquíssimos dias de Sprints e Planejamento arquitetural?", "Queremos um app de encontros com UX formidável voltado ao mercado AA de grana.", "O banco de dados de Matches precisa ser incrivelmente sigiloso, por conta que os ricaços temem por sua LGPD... Usem Criptografia sólida nesse projeto pf :3"] },
+  { id: "SCN-024", theme: "Kernel Customizado Mod-X", company: "CyberDynamics", stakeholder: "Linus T.", role: "Lead OS Dev", projectType: "Sistema Operacional", complexity: "Alta", briefing: ["Temos um contrato militar.", "Precisamos construir um Sistema Operacional proprietário focado em altíssima segurança para drones autônomos.", "Não é brincadeira Web. Isso vai rodar em metal limpo (Bare Metal), escovando bits, gerenciando memória manualmente via ponteiros.", "Pelo amor de deus, nem pensem em usar interpretadores emulados em máquina virtual para isso... Escolham a linguagem certa e a ausência absoluta de Banco de Dados local."] },
 ];
