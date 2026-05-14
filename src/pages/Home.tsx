@@ -15,45 +15,82 @@ const Home = () => {
 
   const handleJoin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!roomCode || !studentName || !companyName) {
-      toast.error('Preencha os campos de Sala, Aluno e Empresa.');
+    if (!studentName || !companyName) {
+      toast.error('Preencha os campos de Aluno e Empresa.');
       return;
     }
     
     setLoading(true);
     try {
-      const code = roomCode.toUpperCase();
-      const roomRef = doc(db, 'rooms', code);
-      const roomSnap = await getDoc(roomRef);
+      const joinId = `${studentName} (${companyName})`;
 
-      if (roomSnap.exists()) {
-        const joinId = `${studentName} (${companyName})`;
-        const playerRef = doc(db, `rooms/${code}/players`, joinId);
+      if (roomCode) {
+        const code = roomCode.toUpperCase();
+        const roomRef = doc(db, 'rooms', code);
+        const roomSnap = await getDoc(roomRef);
+
+        if (roomSnap.exists()) {
+          const playerRef = doc(db, `rooms/${code}/players`, joinId);
+          
+          await setDoc(playerRef, {
+            companyName: companyName,
+            studentName: studentName,
+            currentPhase: roomSnap.data().isActive ? 1 : 0,
+            joinedAt: new Date(),
+            projectData: {},
+            money: 10000, 
+            rating: 5,
+          });
+
+          // Add history log event if active
+          if (roomSnap.data().isActive) {
+             await updateDoc(roomRef, {
+               [`announcements.${Date.now()}`]: `A empresa ${companyName} (CEO: ${studentName}) registrou um CNPJ no Vale do Silício.`
+             });
+          }
+
+          toast.success('Sala encontrada! Acessando...');
+          navigate(`/player/${code}/${encodeURIComponent(joinId)}`);
+        } else {
+          toast.error('Sala não encontrada. Verifique o código ou deixe em branco para jogar sozinho.');
+        }
+      } else {
+        // Criar sala solo automaticamente
+        const code = 'SOLO-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+        const roomRef = doc(db, 'rooms', code);
         
+        await setDoc(roomRef, {
+          isActive: true,
+          createdAt: new Date().toISOString(),
+          isSolo: true,
+          globalEvents: {
+            aiBubble: false,
+            comBurst: false,
+            lgpd: false,
+            pandemic: false,
+            dataBreach: false,
+            angelInvest: false,
+            seniorShortage: false,
+            cloudOutage: false
+          }
+        });
+
+        const playerRef = doc(db, `rooms/${code}/players`, joinId);
         await setDoc(playerRef, {
           companyName: companyName,
           studentName: studentName,
-          currentPhase: 0,
+          currentPhase: 1, // Inicia direto na fase 1
           joinedAt: new Date(),
           projectData: {},
           money: 10000, 
           rating: 5,
         });
 
-        // Add history log event if active
-        if (roomSnap.data().isActive) {
-           await updateDoc(roomRef, {
-             [`announcements.${Date.now()}`]: `A empresa ${companyName} (CEO: ${studentName}) registrou um CNPJ no Vale do Silício.`
-           });
-        }
-
-        toast.success('Sala encontrada! Acessando...');
+        toast.success('Jogo Solo iniciado com sucesso!');
         navigate(`/player/${code}/${encodeURIComponent(joinId)}`);
-      } else {
-        toast.error('Sala não encontrada. Verifique o código com o professor.');
       }
     } catch (error) {
-       toast.error('Erro ao acessar a sala de simulação.');
+       toast.error('Erro ao acessar a simulação.');
     } finally {
       setLoading(false);
     }
@@ -105,7 +142,7 @@ const Home = () => {
                type="text"
                value={roomCode}
                onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
-               placeholder="Código da Sala (Ex: COMP-X)"
+               placeholder="Código da Sala (Opcional - Vazio para Solo)"
                className="input-premium"
                maxLength={10}
                style={{ paddingLeft: '38px', width: '100%', textTransform: 'uppercase' }}
@@ -118,7 +155,7 @@ const Home = () => {
              style={{ marginTop: '1rem', width: '100%' }}
              disabled={loading}
           >
-            {loading ? 'Conectando ao Ecosistema...' : 'Abrir Empresa e Iniciar'}
+            {loading ? 'Conectando ao Ecosistema...' : (roomCode ? 'Entrar na Sala' : 'Iniciar Jogo Solo')}
           </button>
         </form>
       </motion.div>
