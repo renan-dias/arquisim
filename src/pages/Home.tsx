@@ -1,13 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { db } from '../services/firebase';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import { LogIn, Building, User } from 'lucide-react';
+import { Building, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 
 const Home = () => {
-  const [roomCode, setRoomCode] = useState('');
   const [studentName, setStudentName] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -24,73 +21,25 @@ const Home = () => {
     try {
       const joinId = `${studentName} (${companyName})`;
 
-      if (roomCode) {
-        const code = roomCode.toUpperCase();
-        const roomRef = doc(db, 'rooms', code);
-        const roomSnap = await getDoc(roomRef);
+      // Salva o estado inicial inteiramente no localStorage
+      const initialState = {
+        studentName,
+        companyName,
+        currentPhase: 1, // Começa direto na Fase 1
+        money: 10000,
+        projectData: {},
+        joinedAt: new Date().toISOString(),
+        rating: 5,
+        bugs: 0
+      };
 
-        if (roomSnap.exists()) {
-          const playerRef = doc(db, `rooms/${code}/players`, joinId);
-          
-          await setDoc(playerRef, {
-            companyName: companyName,
-            studentName: studentName,
-            currentPhase: roomSnap.data().isActive ? 1 : 0,
-            joinedAt: new Date(),
-            projectData: {},
-            money: 10000, 
-            rating: 5,
-          });
+      localStorage.setItem('arquisim_player_state', JSON.stringify(initialState));
 
-          // Add history log event if active
-          if (roomSnap.data().isActive) {
-             await updateDoc(roomRef, {
-               [`announcements.${Date.now()}`]: `A empresa ${companyName} (CEO: ${studentName}) registrou um CNPJ no Vale do Silício.`
-             });
-          }
-
-          toast.success('Sala encontrada! Acessando...');
-          navigate(`/player/${code}/${encodeURIComponent(joinId)}`);
-        } else {
-          toast.error('Sala não encontrada. Verifique o código ou deixe em branco para jogar sozinho.');
-        }
-      } else {
-        // Criar sala solo automaticamente
-        const code = 'SOLO-' + Math.random().toString(36).substring(2, 6).toUpperCase();
-        const roomRef = doc(db, 'rooms', code);
-        
-        await setDoc(roomRef, {
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          isSolo: true,
-          globalEvents: {
-            aiBubble: false,
-            comBurst: false,
-            lgpd: false,
-            pandemic: false,
-            dataBreach: false,
-            angelInvest: false,
-            seniorShortage: false,
-            cloudOutage: false
-          }
-        });
-
-        const playerRef = doc(db, `rooms/${code}/players`, joinId);
-        await setDoc(playerRef, {
-          companyName: companyName,
-          studentName: studentName,
-          currentPhase: 1, // Inicia direto na fase 1
-          joinedAt: new Date(),
-          projectData: {},
-          money: 10000, 
-          rating: 5,
-        });
-
-        toast.success('Jogo Solo iniciado com sucesso!');
-        navigate(`/player/${code}/${encodeURIComponent(joinId)}`);
-      }
+      toast.success('Empresa registrada localmente! Iniciando simulação...');
+      // Usamos a rota padrão mantendo o formato, mas com IDs locais/offline
+      navigate(`/player/solo/${encodeURIComponent(joinId)}`);
     } catch (error) {
-       toast.error('Erro ao acessar a simulação.');
+       toast.error('Erro ao salvar os dados localmente.');
     } finally {
       setLoading(false);
     }
@@ -106,8 +55,11 @@ const Home = () => {
       >
         <div style={{ marginBottom: '2rem' }}>
           <Building size={48} color="var(--primary-color)" style={{ margin: '0 auto 1rem' }} />
-          <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>ArquiSim V3</h2>
+          <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>ArquiSim V2</h2>
           <p style={{ color: 'var(--text-secondary)' }}>Tycoon Simulator & Engenharia de Software</p>
+          <span style={{ display: 'inline-block', marginTop: '4px', fontSize: '0.75rem', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '2px 8px', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+            Modo Offline Seguro
+          </span>
         </div>
 
         <form onSubmit={handleJoin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -135,19 +87,6 @@ const Home = () => {
                style={{ paddingLeft: '38px', width: '100%' }}
              />
           </div>
-
-          <div style={{ position: 'relative' }}>
-             <LogIn size={18} color="var(--text-secondary)" style={{ position: 'absolute', left: '12px', top: '14px' }} />
-             <input
-               type="text"
-               value={roomCode}
-               onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
-               placeholder="Código da Sala (Opcional - Vazio para Solo)"
-               className="input-premium"
-               maxLength={10}
-               style={{ paddingLeft: '38px', width: '100%', textTransform: 'uppercase' }}
-             />
-          </div>
           
           <button 
              type="submit" 
@@ -155,7 +94,7 @@ const Home = () => {
              style={{ marginTop: '1rem', width: '100%' }}
              disabled={loading}
           >
-            {loading ? 'Conectando ao Ecosistema...' : (roomCode ? 'Entrar na Sala' : 'Iniciar Jogo Solo')}
+            {loading ? 'Preparando Prancheta...' : 'Abrir Empresa e Iniciar'}
           </button>
         </form>
       </motion.div>

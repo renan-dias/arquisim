@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { db } from '../services/firebase';
-import { doc, onSnapshot, updateDoc, getDoc } from 'firebase/firestore';
 import { Activity } from 'lucide-react';
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 
 import PhaseBriefing from '../components/SDLC/PhaseBriefing';
 import PhasePlanning from '../components/SDLC/PhasePlanning';
@@ -16,11 +14,9 @@ import GlobalNotepad from '../components/GlobalNotepad';
 
 import { scenarios } from '../data/scenarios';
 import type { Scenario } from '../data/scenarios';
-import toast from 'react-hot-toast';
 
 const PlayerRoom = () => {
-  const { roomId, playerId } = useParams();
-  const [currentPhase, setCurrentPhase] = useState(0);
+  const [currentPhase, setCurrentPhase] = useState(1);
   const [projectData, setProjectData] = useState<any>({});
   const [scenario, setScenario] = useState<Scenario | null>(null);
   
@@ -28,137 +24,88 @@ const PlayerRoom = () => {
   const [companyName, setCompanyName] = useState('');
   const [money, setMoney] = useState(10000);
 
+  // Lê o estado inicial do localStorage
   useEffect(() => {
-    if (!roomId || !playerId) return;
+    const savedStateStr = localStorage.getItem('arquisim_player_state');
+    if (savedStateStr) {
+      try {
+        const state = JSON.parse(savedStateStr);
+        setStudentName(state.studentName || 'CEO');
+        setCompanyName(state.companyName || 'Empresa V2');
+        setMoney(state.money !== undefined ? state.money : 10000);
+        setCurrentPhase(state.currentPhase || 1);
+        setProjectData(state.projectData || {});
 
-    const playerRef = doc(db, 'rooms', roomId, 'players', playerId);
-    
-    getDoc(playerRef).then((snap) => {
-       if (snap.exists()) {
-          const data = snap.data();
-          setStudentName(data.studentName || '');
-          setCompanyName(data.companyName || '');
-          setMoney(data.money || 10000);
-
-          if (!data.scenarioId) {
-             const randomScenario = scenarios[Math.floor(Math.random() * scenarios.length)];
-             updateDoc(playerRef, { scenarioId: randomScenario.id });
-             setScenario(randomScenario);
-          } else {
-             setScenario(scenarios.find(s => s.id === data.scenarioId) || scenarios[0]);
-          }
-       }
-    });
-
-    const roomRef = doc(db, 'rooms', roomId);
-    let lastEventCount = 0;
-
-    const unsubRoom = onSnapshot(roomRef, (doc) => {
-      if (doc.exists()) {
-        const data = doc.data();
-        
-        setCurrentPhase(prev => {
-           if (data.isClosed) return 999;
-           if (data.isActive && prev === 0) return 1;
-           return prev;
-        });
-        
-        const currentEventCount = Object.values(data.globalEvents || {}).filter(Boolean).length;
-        if (currentEventCount > lastEventCount) {
-           setCurrentPhase(prev => {
-             if (prev > 0 && prev !== 999) {
-               toast('⚠️ Um Evento Global Ocorreu no Mercado!', { icon: '🌍', style: { border: '1px solid var(--danger-color)' } });
-             }
-             return prev;
-           });
+        // Cenário
+        if (!state.scenarioId) {
+          const randomScenario = scenarios[Math.floor(Math.random() * scenarios.length)];
+          setScenario(randomScenario);
+          state.scenarioId = randomScenario.id;
+          localStorage.setItem('arquisim_player_state', JSON.stringify(state));
+        } else {
+          setScenario(scenarios.find(s => s.id === state.scenarioId) || scenarios[0]);
         }
-        lastEventCount = currentEventCount;
+      } catch (e) {
+        console.error('Erro ao ler state local', e);
       }
-    });
-
-    const unsubPlayer = onSnapshot(playerRef, (doc) => {
-      if (doc.exists()) {
-        const data = doc.data();
-        if (data.currentPhase > currentPhase) {
-          setCurrentPhase(data.currentPhase);
-        }
-        if (data.projectData) {
-          setProjectData(data.projectData);
-        }
-        if (data.money !== undefined) setMoney(data.money);
-      }
-    });
-
-    return () => {
-      unsubRoom();
-      unsubPlayer();
-    };
-  }, [roomId, playerId]);
+    } else {
+      // Fallback de segurança se acessar a rota diretamente
+      setStudentName('Arquiteto Chefe');
+      setCompanyName('Corporação V2');
+      setScenario(scenarios[0]);
+      setCurrentPhase(1);
+    }
+  }, []);
 
   const persistPhase = async (phaseNum: number, extraData: any = {}, newMoney?: number) => {
-    if (!roomId || !playerId) return;
-    const playerRef = doc(db, 'rooms', roomId, 'players', playerId);
-    
-    // In V3 we also persist the bank balance when moving phases
-    const updatePayload: any = {
-      currentPhase: phaseNum,
-      projectData: { ...projectData, ...extraData }
-    };
-    if (newMoney !== undefined) updatePayload.money = newMoney;
-
-    await updateDoc(playerRef, updatePayload);
+    setCurrentPhase(phaseNum);
+    setProjectData((prevData: any) => {
+      const updatedProjectData = { ...prevData, ...extraData };
+      const savedStateStr = localStorage.getItem('arquisim_player_state');
+      if (savedStateStr) {
+        try {
+          const state = JSON.parse(savedStateStr);
+          state.currentPhase = phaseNum;
+          state.projectData = updatedProjectData;
+          if (newMoney !== undefined) state.money = newMoney;
+          localStorage.setItem('arquisim_player_state', JSON.stringify(state));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      return updatedProjectData;
+    });
+    if (newMoney !== undefined) setMoney(newMoney);
   };
 
   const handleCompleteBriefing = async (briefingData: any) => {
-    setProjectData({ ...projectData, briefing: briefingData });
-    setCurrentPhase(2);
     await persistPhase(2, { briefing: briefingData });
   };
 
   const handleCompletePlanning = async (planningData: any) => {
-    setProjectData({ ...projectData, planning: planningData });
-    setCurrentPhase(3);
     await persistPhase(3, { planning: planningData });
   };
 
   const handleCompleteArchitecture = async (archData: any) => {
-    setProjectData({ ...projectData, architecture: archData });
-    setCurrentPhase(4);
     await persistPhase(4, { architecture: archData });
   };
 
   const handleCompleteImplementation = async (bugsGenerated: number) => {
-    setProjectData({ ...projectData, bugs: bugsGenerated });
-    setCurrentPhase(5); 
     await persistPhase(5, { bugs: bugsGenerated });
   };
 
   const handleCompleteDomain = async (domainData: any) => {
     const newMoney = money - domainData.price;
-    setMoney(newMoney);
-    setProjectData({ ...projectData, domain: domainData });
-    setCurrentPhase(6); 
     await persistPhase(6, { domain: domainData }, newMoney);
   };
 
   const handleCompleteReview = async () => {
-    setCurrentPhase(7); 
     await persistPhase(7);
-
-    // Notifica Global as V3 Expansion Request
-    if (roomId) {
-      const roomRef = doc(db, 'rooms', roomId);
-      await updateDoc(roomRef, {
-        [`announcements.${Date.now()}`]: `NOVO LANÇAMENTO: O Aluno ${studentName} (Empresa: ${companyName}) lançou o sistema do cliente ${scenario?.company} no mercado global!`
-      });
-    }
+    toast.success('Sistema lançado globalmente em ambiente local/offline!');
   };
 
   const handleUpdateRelease = async (featureName: string, _featureDesc: string) => {
-    // Nova Feature Lifecycle: Volta para Planejamento UML (Fase 2) mas preserva a fundação
-    setCurrentPhase(2);
     await persistPhase(2);
-    
     if (featureName) {
       toast(`Iniciando o desenvolvimento da feature: ${featureName}`, { icon: '✨' });
     } else {
@@ -167,14 +114,17 @@ const PlayerRoom = () => {
   };
 
   const handleLiveMoneyUpdate = (newTotal: number) => {
-    if (Math.abs(money - newTotal) > 500) { // Throttle writes slightly
-      setMoney(Math.floor(newTotal));
-      // update firebase locally too so it syncs up to admin
-      if (roomId && playerId) {
-         updateDoc(doc(db, 'rooms', roomId, 'players', playerId), { money: Math.floor(newTotal) });
+    const floored = Math.floor(newTotal);
+    setMoney(floored);
+    const savedStateStr = localStorage.getItem('arquisim_player_state');
+    if (savedStateStr) {
+      try {
+        const state = JSON.parse(savedStateStr);
+        state.money = floored;
+        localStorage.setItem('arquisim_player_state', JSON.stringify(state));
+      } catch (e) {
+        // ignore
       }
-    } else {
-      setMoney(Math.floor(newTotal));
     }
   };
 
@@ -197,7 +147,7 @@ const PlayerRoom = () => {
             {companyName || 'Carregando...'}
             <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}> CEO: {studentName}</span>
           </h2>
-          <span style={{ color: 'var(--text-secondary)' }}>Sala: {roomId} | Caixa: <span style={{ color: money >= 0 ? '#10b981' : '#ef4444', fontWeight: 'bold' }}>${money.toLocaleString()}</span></span>
+          <span style={{ color: 'var(--text-secondary)' }}>Modo: Offline V2 | Caixa: <span style={{ color: money >= 0 ? '#10b981' : '#ef4444', fontWeight: 'bold' }}>${money.toLocaleString()}</span></span>
         </div>
         <div className="glass-panel" style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Activity size={18} color="var(--primary-color)" />
@@ -213,10 +163,7 @@ const PlayerRoom = () => {
             className="glass-panel"
             style={{ padding: '3rem', textAlign: 'center', maxWidth: '600px' }}
           >
-            <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Aguardando o Professor Iniciar...</h3>
-            <p style={{ color: 'var(--text-secondary)' }}>
-              Aguarde a ativação da simulação para sua corporação iniciar os trabalhos.
-            </p>
+            <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Iniciando Simulação Local...</h3>
             <div style={{ marginTop: '2rem' }} className="loader"></div>
           </motion.div>
         )}
@@ -227,21 +174,7 @@ const PlayerRoom = () => {
         {currentPhase === 4 && scenario && <PhaseImplementation scenario={scenario} stats={projectData.architecture?.expectedStats} onComplete={handleCompleteImplementation} />}
         {currentPhase === 5 && <PhaseDomain companyName={companyName} projectData={projectData} onComplete={handleCompleteDomain} />}
         {currentPhase === 6 && scenario && <PhaseReview scenario={scenario} projectData={projectData} onComplete={handleCompleteReview} />}
-        {currentPhase === 7 && <PhaseLaunch roomId={roomId as string} playerId={playerId as string} stats={projectData.architecture?.expectedStats} bugs={projectData.bugs} currentMoney={money} companyName={companyName} studentName={studentName} projectData={projectData} scenario={scenario} onUpdateMoney={handleLiveMoneyUpdate} onLaunchUpdate={handleUpdateRelease} />}
-        
-        {currentPhase === 999 && (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="glass-panel"
-            style={{ padding: '3rem', textAlign: 'center', maxWidth: '600px', border: '1px solid var(--danger-color)' }}
-          >
-            <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--danger-color)' }}>A Simulação foi Encerrada pelo Professor.</h3>
-            <p style={{ color: 'var(--text-secondary)' }}>
-              Agradecemos por jogar o ArquiSim Empresarial. Todo o mercado global foi fechado e os servidores deligados.
-            </p>
-          </motion.div>
-        )}
+        {currentPhase === 7 && <PhaseLaunch roomId="solo" playerId="local" stats={projectData.architecture?.expectedStats} bugs={projectData.bugs || 0} currentMoney={money} companyName={companyName} studentName={studentName} projectData={projectData} scenario={scenario} onUpdateMoney={handleLiveMoneyUpdate} onLaunchUpdate={handleUpdateRelease} />}
       </main>
       <GlobalNotepad />
     </div>
